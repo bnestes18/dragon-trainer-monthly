@@ -1,0 +1,16 @@
+#app {
+    margin: 10%;
+}
+
+h1 {
+    margin: 70px auto;
+    text-align: center;
+}
+
+li {
+    list-style-type: none;
+}
+
+#article-title {
+    font-size: 22px;
+}
