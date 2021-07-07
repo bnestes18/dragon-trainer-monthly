@@ -1,33 +1,56 @@
+// VARIABLES
 let app = document.getElementById('app');
 
+
+// FUNCTIONS
+
+// This function renders an error message if no data is displayed on the page
+function renderFail() {
+    app.innerHTML = `<p>Uh-oh...the articles have went up in flames! Unable to display any data at this time.</p>`
+}
+
+// This function returns the data from the dragons api
+async function getData() {
+    try {
+        // Fetch a response from the api
+        let response = await fetch('https://vanillajsacademy.com/api/dragons.json');
+        // If the response is not okay (anything other than code 200), then throw an error code
+        if (!response.ok) {
+            throw response.status;
+        }
+
+        // Otherwise, convert the response data into JSON format
+        let data = await response.json();
+        return data;
+        } catch (error) {
+            console.warn(error);
+            renderFail();
+        }
+        
+}
+
+// This functon displays each article from the data obtained from an api
 async function renderArticles() {
-    // Fetch a response from the api
-    let response = await fetch('https://vanillajsacademy.com/api/dragons.json');
-    // If the response is not okay (anything other than code 200), then return an error message 
-    if (!response.ok) {
-        throw `Unfortunately, something went wrong...please view the following error code: ${response.status}`
+    let data = await getData();
+
+    if (!data.articles || !data.articles.length) {
+        renderFail();
+        return;
     }
 
-    // Otherwise, convert the response data into JSON format
-    let data = await response.json();
-
-    // Store api data - this data is referenced in the 'template' variable
-    let mainTitle = data.publication;
-    let articles = data.articles.map(function(article) {
-        return `<li>
-                    <div>
-                        <strong id="article-title"><a href="${article.url}">${article.title}</a></strong> 
-                        <p id="article-author">by ${article.author}</p>
-                        <p id="article-body">${article.article}</p>
-                    </div>
-                </li>`
+    let template = "<h1>" + data.publication + "</h1>" + data.articles.map(function(article) {
+        return `
+                <article>    
+                    <strong id="article-title"><a href="${article.url}">${article.title}</a></strong> 
+                    <p id="article-author">by ${article.author}</p>
+                    <p id="article-body">${article.article}</p>
+                </article>   
+                `
         }).join('');
 
-    let template = `<h1>${mainTitle}</h1>
-                    <ul>${articles}</ul>
-    `
-    // Render the template (and its data) to the DOM
+    // Render the template to the DOM
     app.innerHTML = template;
 }
 
+// Render the articles on initial page load
 renderArticles();
