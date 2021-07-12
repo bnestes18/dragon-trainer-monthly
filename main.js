@@ -4,53 +4,57 @@ let app = document.getElementById('app');
 
 // FUNCTIONS
 
+// This function will fetch api data and return the data content in JSON
+async function fetchData(url) {
+    let response = await fetch(url);
+
+    // If the response is not okay (anything other than code 200), then throw an error code
+    if (!response.ok) {
+        throw response.status;
+    }
+    
+    // Otherwise, convert the response data into JSON format
+    let content = await response.json();
+    return content;
+}
+
 // This function renders an error message if no data is displayed on the page
 function renderFail() {
     app.innerHTML = `<p>Uh-oh...the articles have went up in flames! Unable to display any data at this time.</p>`
 }
 
-// This function returns the data from the dragons api
-async function getData() {
-    try {
-        // Fetch a response from the api
-        let response = await fetch('https://vanillajsacademy.com/api/dragons.json');
-        // If the response is not okay (anything other than code 200), then throw an error code
-        if (!response.ok) {
-            throw response.status;
-        }
-
-        // Otherwise, convert the response data into JSON format
-        let data = await response.json();
-        return data;
-        } catch (error) {
-            console.warn(error);
-            renderFail();
-        }
-        
-}
-
-// This functon displays each article from the data obtained from an api
+// This function displays each article from the data obtained from an api
 async function renderArticles() {
-    let data = await getData();
+    // Fetch and store the responses' data
+    let data = await Promise.all([
+        fetchData('https://vanillajsacademy.com/api/dragons.json'), 
+        fetchData('https://vanillajsacademy.com/api/dragons-authors.json')
+    ]);
 
-    if (!data.articles || !data.articles.length) {
-        renderFail();
-        return;
-    }
+    let dragons = data[0];
+    let dragonsAuthors = data[1];
 
-    let template = "<h1>" + data.publication + "</h1>" + data.articles.map(function(article) {
+    // Create and render the template to the DOM
+    let template = "<h1>" + dragons.publication + "</h1>" + dragons.articles.map(function(article) {
+        let author = dragonsAuthors.authors.find(function(dragonsAuthor) {
+            return dragonsAuthor.author === (article.author)
+        })
         return `
                 <article>    
                     <strong id="article-title"><a href="${article.url}">${article.title}</a></strong> 
                     <p id="article-author">by ${article.author}</p>
                     <p id="article-body">${article.article}</p>
-                </article>   
+                    <h3>About the Author</h3>
+                    <p>${author.bio}</p>
+                </article>
                 `
         }).join('');
 
-    // Render the template to the DOM
     app.innerHTML = template;
 }
 
 // Render the articles on initial page load
-renderArticles();
+renderArticles().catch(function(e) {
+    console.warn(e);
+    renderFail();
+});
