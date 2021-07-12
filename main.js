@@ -42,10 +42,8 @@ async function renderArticles() {
         return `
                 <article>    
                     <strong id="article-title"><a href="${article.url}">${article.title}</a></strong> 
-                    <p id="article-author">by ${article.author}</p>
+                    <p id="article-author"><em>By ${author ? `${article.author} - ${author.bio}` : `${article.author}`}</em></p>
                     <p id="article-body">${article.article}</p>
-                    <h3>About the Author</h3>
-                    <p>${author.bio}</p>
                 </article>
                 `
         }).join('');
