@@ -4,6 +4,18 @@ let app = document.getElementById('app');
 
 // FUNCTIONS
 
+/**
+ * Sanitize and encode all HTML in a user-submitted string
+ * https://portswigger.net/web-security/cross-site-scripting/preventing
+ * @param  {String} str  The user-submitted string
+ * @return {String} str  The sanitized string
+ */
+function sanitizeHTML (str) {
+	return str.replace(/javascript:/gi, '').replace(/[^\w-_. ]/gi, function (c) {
+		return `&#${c.charCodeAt(0)};`;
+	});
+}
+
 // This function will fetch api data and return the data content in JSON
 async function fetchData(url) {
     let response = await fetch(url);
@@ -35,15 +47,15 @@ async function renderArticles() {
     let dragonsAuthors = data[1];
 
     // Create and render the template to the DOM
-    let template = "<h1>" + dragons.publication + "</h1>" + dragons.articles.map(function(article) {
+    let template = "<h1>" + sanitizeHTML(dragons.publication) + "</h1>" + dragons.articles.map(function(article) {
         let author = dragonsAuthors.authors.find(function(dragonsAuthor) {
-            return dragonsAuthor.author === (article.author)
+            return dragonsAuthor.author === article.author
         })
         return `
                 <article>    
-                    <strong id="article-title"><a href="${article.url}">${article.title}</a></strong> 
-                    <p id="article-author"><em>By ${author ? `${article.author} - ${author.bio}` : `${article.author}`}</em></p>
-                    <p id="article-body">${article.article}</p>
+                    <strong id="article-title"><a href="${sanitizeHTML(article.url)}">${sanitizeHTML(article.title)}</a></strong> 
+                    <p id="article-author"><em>By ${sanitizeHTML(author ? `${author.author} - ${author.bio}` : article.author)}</em></p>
+                    <p id="article-body">${sanitizeHTML(article.article)}</p>
                 </article>
                 `
         }).join('');
