@@ -11,7 +11,7 @@ let app = document.getElementById('app');
  * @return {String} str  The sanitized string
  */
 function sanitizeHTML (str) {
-	return str.replace(/javascript:/gi, '').replace(/[^\w-_. ]/gi, function (c) {
+	return str.toString().replace(/javascript:/gi, '').replace(/[^\w-_. ]/gi, function (c) {
 		return `&#${c.charCodeAt(0)};`;
 	});
 }
